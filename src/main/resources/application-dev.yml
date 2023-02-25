@@ -1,0 +1,41 @@
+#pass master: postgresql
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/dxlaboratorio
+    username: ENC(vI59AEanHQFdsR/jqAr45u5VFZAecO2g)
+    password: ENC(vI59AEanHQFdsR/jqAr45u5VFZAecO2g)
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, validate, update)
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format-sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+cloud:
+  aws:
+    credentials:
+      access-key: ENC(0NzgbCUUMugXZn76AiY0HOvPGtM20Nb0eVzevt8RkZ8=)
+      secret-key: ENC(MC0qyG0drROHKkxkCrHjVqSVOIZNRtD/lnWnnOAsFppafjkGyriVfwGzF+7lvpPsBg4LIyC0eV4=)
+    region:
+      static: us-east-1
+    stack:
+      auto: false
+      enabled: false
+    s3:
+      bucket-name: dxlab-result-lab
+      max-length-files: 3
+      max-file-size-mb: 10
+
+jasypt:
+  encryptor:
+    algorithm: PBEWithMD5AndDES
+    iv-generator-classname: org.jasypt.iv.NoIvGenerator
+    seed: u8x/A?D(G+KbPeShVmYq3s6v9y$B&E)H

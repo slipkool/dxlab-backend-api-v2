@@ -1,0 +1,39 @@
+server:
+  port: 80
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+      resolve-lazily: true
+  jpa:
+    show-sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        #scape reserved keyword of SQL
+        #globally_quoted_identifiers: true
+        #globally_quoted_identifiers_skip_column_definitions: true
+        # Hibernate ddl auto (create, create-drop, validate, update)
+        ddl-auto: validate #update
+    h2:
+      console:
+        enabled: true
+    datasource:
+      url: jdbc:postgresql://localhost:5432/dxlaboratorio #jdbc:h2:mem:testdb;DB_CLOSE_DELAY=- 1;MODE=MySQL;NON_KEYWORDS=USER
+      username: postgres #test
+      password: postgres #test
+      driver-class-name: org.postgresql.Driver
+
+cloud:
+  aws:
+    credentials:
+      access-key: AKIAJMP3M4HEYTO6ZH4A
+      secret-key: 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
+    region:
+      static: us-east-1
+    stack:
+      auto: false
+    s3:
+      bucket-name: dxlab-result

@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, validate, update)
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+cloud:
+  aws:
+    region:
+      static: us-east-1
+    stack:
+      auto: false
+      enabled: false
+    s3:
+      bucket-name: dxlab-result-lab
+      max-length-files: 3
+      max-file-size-mb: 10
