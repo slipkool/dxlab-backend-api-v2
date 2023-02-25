@@ -15,6 +15,9 @@ spring:
 
 cloud:
   aws:
+    credentials:
+      access-key: localstack
+      secret-key: localstack
     region:
       static: us-east-1
     stack:

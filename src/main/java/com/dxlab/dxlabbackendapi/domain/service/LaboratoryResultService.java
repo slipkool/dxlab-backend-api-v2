@@ -19,7 +19,7 @@ public class LaboratoryResultService implements LaboratoryResultUseCase {
         Order order = orderOutputPort.getOrderById(laboratoryResult.getIdOrder())
                 .orElseThrow(() -> new OrderNotFound("Orden no encontrada con el id: " + laboratoryResult.getIdOrder()));
 
-        //laboratoryResultOutputport.uploadFiles(laboratoryResult);
+        laboratoryResultOutputport.uploadFiles(laboratoryResult);
 
         order.setReadyResult(true);
         if(!orderOutputPort.updateDateResultOrder(order)) {

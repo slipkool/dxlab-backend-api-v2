@@ -27,7 +27,7 @@ public class LaboratoryResultAdapter {
     public ResponseEntity<ResultadoLaboratorioResponse> uploadLabResult(@ModelAttribute ResultadoLaboratorioRequest request) {
         request.validateSelf(properties.getMaxLengthFiles(),properties.getMaxFileSizeMb());
         LaboratoryResult laboratoryResult = LaboratoryResultMapper.INTANCE.toLaboratoryResult(request);
-        System.out.println("--PASO " + request.getIdOrden() + " " + request.getArchivos());
+
         laboratoryResultUseCase.uploadLabResult(laboratoryResult);
 
         URI location = URI.create(String.format("/cargar-resultados/%s", request.getIdOrden()));
