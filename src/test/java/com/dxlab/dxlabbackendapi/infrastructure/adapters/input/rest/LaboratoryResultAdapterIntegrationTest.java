@@ -5,7 +5,6 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.dxlab.dxlabbackendapi.infrastructure.adapters.output.persistence.entity.OrderEntity;
 import com.dxlab.dxlabbackendapi.infrastructure.adapters.output.persistence.repository.OrderRespository;
 import com.dxlab.dxlabbackendapi.testcontainer.config.DbS3ContainersEnviroment;
-import org.junit.After;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -13,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -26,6 +27,7 @@ import java.nio.file.Paths;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @ActiveProfiles("test")
 class LaboratoryResultAdapterIntegrationTest extends DbS3ContainersEnviroment {
 
@@ -51,6 +53,7 @@ class LaboratoryResultAdapterIntegrationTest extends DbS3ContainersEnviroment {
     @TestConfiguration
     static class AwsTestConfig {
         @Bean
+        @Profile("test")
         public AmazonS3 amazonS3() {
             return AmazonS3ClientBuilder.standard()
                     .withCredentials(localStackContainer.getDefaultCredentialsProvider())

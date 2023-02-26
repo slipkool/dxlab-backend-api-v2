@@ -24,6 +24,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class OrderRestAdapterMockEnvIntegrationTest extends DbContainerEnviroment {
 
+    public static final String USER_PEPITO_PEREZ = "Pepito perez";
+    public static final String USER_JOSE_JOSE = "Jose jose";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -33,20 +36,20 @@ class OrderRestAdapterMockEnvIntegrationTest extends DbContainerEnviroment {
         mockMvc.perform(get("/v1/orden/todos"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].usuario", is("Pepito perez")))
-                .andExpect(jsonPath("$[1].usuario", is("Jose jose")));
+                .andExpect(jsonPath("$[0].usuario", is(USER_PEPITO_PEREZ)))
+                .andExpect(jsonPath("$[1].usuario", is(USER_JOSE_JOSE)));
     }
 
     @Test
     void createOrder() throws Exception {
         mockMvc.perform(post("/v1/orden")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("""
+                .content(String.format("""
                               {
-                                  "usuario": "pepito perez",
+                                  "usuario": "%s",
                                   "examen": "Examen de colesterol",
                                   "muestraPendiente": true
-                              }"""))
+                              }""", USER_PEPITO_PEREZ)))
                 .andExpect(status().isCreated());
     }
 }
