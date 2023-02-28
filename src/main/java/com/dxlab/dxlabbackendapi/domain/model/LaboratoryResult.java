@@ -1,7 +1,8 @@
 package com.dxlab.dxlabbackendapi.domain.model;
 
 import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Builder
 @Getter
@@ -10,5 +11,5 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 public class LaboratoryResult {
     private Long idOrder;
-    private MultipartFile[] files;
+    private List<LaboratoryFile> files;
 }

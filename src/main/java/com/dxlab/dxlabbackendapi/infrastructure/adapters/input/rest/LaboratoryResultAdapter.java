@@ -5,7 +5,7 @@ import com.dxlab.dxlabbackendapi.domain.model.LaboratoryResult;
 import com.dxlab.dxlabbackendapi.infrastructure.adapters.config.S3Properties;
 import com.dxlab.dxlabbackendapi.infrastructure.adapters.input.rest.data.request.ResultadoLaboratorioRequest;
 import com.dxlab.dxlabbackendapi.infrastructure.adapters.input.rest.data.response.ResultadoLaboratorioResponse;
-import com.dxlab.dxlabbackendapi.infrastructure.adapters.input.rest.mapper.LaboratoryResultMapper;
+import com.dxlab.dxlabbackendapi.infrastructure.adapters.input.rest.mapper.LaboratoryResultRestMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -26,11 +26,11 @@ public class LaboratoryResultAdapter {
     @PostMapping("/cargar-resultados")
     public ResponseEntity<ResultadoLaboratorioResponse> uploadLabResult(@ModelAttribute ResultadoLaboratorioRequest request) {
         request.validateSelf(properties.getMaxLengthFiles(),properties.getMaxFileSizeMb());
-        LaboratoryResult laboratoryResult = LaboratoryResultMapper.INTANCE.toLaboratoryResult(request);
+        LaboratoryResult laboratoryResult = LaboratoryResultRestMapper.INTANCE.toLaboratoryResult(request);
 
         laboratoryResultUseCase.uploadLabResult(laboratoryResult);
 
         URI location = URI.create(String.format("/cargar-resultados/%s", request.getIdOrden()));
-        return ResponseEntity.created(location).body(LaboratoryResultMapper.INTANCE.toLaboratoryResponse(request));
+        return ResponseEntity.created(location).body(LaboratoryResultRestMapper.INTANCE.toLaboratoryResponse(request));
     }
 }

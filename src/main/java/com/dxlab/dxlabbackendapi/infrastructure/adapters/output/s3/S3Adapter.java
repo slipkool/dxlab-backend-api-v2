@@ -5,12 +5,10 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.dxlab.dxlabbackendapi.application.ports.output.LaboratoryResultOutputport;
 import com.dxlab.dxlabbackendapi.domain.exception.LaboratoryResultException;
+import com.dxlab.dxlabbackendapi.domain.model.LaboratoryFile;
 import com.dxlab.dxlabbackendapi.domain.model.LaboratoryResult;
 import com.dxlab.dxlabbackendapi.infrastructure.adapters.config.S3Properties;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 @RequiredArgsConstructor
 public class S3Adapter implements LaboratoryResultOutputport {
@@ -19,23 +17,23 @@ public class S3Adapter implements LaboratoryResultOutputport {
 
     @Override
     public void uploadFiles(LaboratoryResult laboratoryResult) {
-        for (MultipartFile file: laboratoryResult.getFiles()) {
-            uploadFile(laboratoryResult.getIdOrder(), file);
+        for (LaboratoryFile laboratoryFile: laboratoryResult.getFiles()) {
+            uploadFile(laboratoryResult.getIdOrder(), laboratoryFile);
         }
     }
 
-    private void uploadFile(Long idOrder, MultipartFile file) {
+    private void uploadFile(Long idOrder, LaboratoryFile laboratoryFile) {
         try {
             String path = String.format("%s/%s", properties.getBucketName(), idOrder);
-            String fileName = String.format("%s", file.getOriginalFilename()).replace(" ", "_");
+            String fileName = String.format("%s", laboratoryFile.getFileName());
             ObjectMetadata objectMetadata = new ObjectMetadata();
-            objectMetadata.setContentType(file.getContentType());
-            objectMetadata.setContentLength(file.getSize());
+            objectMetadata.setContentType(laboratoryFile.getContentType());
+            objectMetadata.setContentLength(laboratoryFile.getSize());
 
             validateObjectExist(properties.getBucketName(), String.format("%s/%s", idOrder, fileName));
 
-            amazonS3.putObject(path, fileName, file.getInputStream(), objectMetadata);
-        } catch (AmazonServiceException | IOException e) {
+            amazonS3.putObject(path, fileName, laboratoryFile.getInputStreamFile(), objectMetadata);
+        } catch (AmazonServiceException e) {
             throw new LaboratoryResultException("Error al cargar el archivo al repositorio", e);
         }
     }

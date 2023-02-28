@@ -30,7 +30,6 @@ import java.nio.file.Paths;
 
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
@@ -100,7 +99,7 @@ class LaboratoryResultAdapterMockEnvIntegrationTest extends DbS3ContainersEnviro
                         .file(file2)
                         .part(idOrder)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
+                //.andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.idOrden", is(1)));
     }
@@ -118,7 +117,7 @@ class LaboratoryResultAdapterMockEnvIntegrationTest extends DbS3ContainersEnviro
                         .file(file2)
                         .part(idOrder)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
+                //.andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.detail", is("El archivo ya existe para la orden solicitada")));
     }
@@ -135,7 +134,7 @@ class LaboratoryResultAdapterMockEnvIntegrationTest extends DbS3ContainersEnviro
                         .file(file2)
                         .part(idOrder)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
+                //.andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.detail", is("Orden no encontrada con el id: 1")));
     }
