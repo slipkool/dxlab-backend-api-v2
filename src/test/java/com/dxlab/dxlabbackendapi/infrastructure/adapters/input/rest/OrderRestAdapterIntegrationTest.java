@@ -3,7 +3,7 @@ package com.dxlab.dxlabbackendapi.infrastructure.adapters.input.rest;
 import com.dxlab.dxlabbackendapi.infrastructure.adapters.output.persistence.entity.OrderEntity;
 import com.dxlab.dxlabbackendapi.infrastructure.adapters.output.persistence.repository.OrderRespository;
 import com.dxlab.dxlabbackendapi.testcontainer.config.DbContainerEnviroment;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,6 +14,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -21,8 +22,8 @@ import static org.hamcrest.Matchers.hasSize;
 @ActiveProfiles("test")
 class OrderRestAdapterIntegrationTest extends DbContainerEnviroment {
 
-    public static final String USER_PEPITO_PEREZ = "Pepito perez";
-    public static final String USER_JOSE_JOSE = "Jose jose";
+    private static final String USER_PEPITO_PEREZ = "Pepito perez";
+    private static final String USER_JOSE_JOSE = "Jose jose";
 
     @Autowired
     OrderRespository orderRespository;
@@ -30,7 +31,7 @@ class OrderRestAdapterIntegrationTest extends DbContainerEnviroment {
     @Autowired
     private WebTestClient webTestClient;
 
-    @BeforeEach
+    @AfterEach
     void deleteEntities() {
         orderRespository.deleteAll();
     }
@@ -48,7 +49,7 @@ class OrderRestAdapterIntegrationTest extends DbContainerEnviroment {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .consumeWith(System.out::println)
+                //.consumeWith(System.out::println)
                 .jsonPath("$[0].id").isEqualTo("1")
                 .jsonPath("$[0].usuario").isEqualTo(USER_PEPITO_PEREZ)
                 .jsonPath("$[0].examen").isEqualTo("Gripe")
@@ -71,9 +72,26 @@ class OrderRestAdapterIntegrationTest extends DbContainerEnviroment {
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody()
-                .consumeWith(System.out::println)
+                //.consumeWith(System.out::println)
                 .jsonPath("$.id").isEqualTo("1")
                 .jsonPath("$.usuario").isEqualTo(USER_PEPITO_PEREZ)
                 .jsonPath("$.examen").isEqualTo("Examen de colesterol");
+    }
+
+    @Test
+    void createOrder_ExceptionEmptyFields() {
+        webTestClient.post().uri("/v1/orden")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("""
+                              {
+                                  "usuario": "",
+                                  "examen": "",
+                                  "muestraPendiente": true
+                              }""")
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.title").isEqualTo("Error al validar los campos")
+                .jsonPath("$.error").value(containsInAnyOrder("El examen no debe ser vacio","Usuario no debe ser vacio"));
     }
 }

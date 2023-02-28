@@ -7,6 +7,8 @@ import com.dxlab.dxlabbackendapi.infrastructure.adapters.output.persistence.enti
 import com.dxlab.dxlabbackendapi.infrastructure.adapters.output.persistence.mapper.OrderPersistenceMapper;
 import com.dxlab.dxlabbackendapi.infrastructure.adapters.output.persistence.repository.OrderRespository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -19,9 +21,8 @@ public class OrderPersistenceAdapter implements OrderOutputPort {
 
     @Override
     public List<Order> getAll() {
-        List<OrderEntity> result = orderRespository.findAll();
-
-        return OrderPersistenceMapper.INSTANCE.toOrderList(result);
+        Page<OrderEntity> result = orderRespository.findAll(Pageable.ofSize(1000));
+        return OrderPersistenceMapper.INSTANCE.toOrderList(result.getContent());
     }
 
     @Override

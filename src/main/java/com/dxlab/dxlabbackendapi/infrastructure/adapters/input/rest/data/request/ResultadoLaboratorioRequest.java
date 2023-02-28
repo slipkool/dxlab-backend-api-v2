@@ -20,7 +20,7 @@ public class ResultadoLaboratorioRequest {
 
     public void validateSelf(int maxLengthFiles, int maxFileSizeMb) {
         if (archivos.length > maxLengthFiles)
-            throw new LaboratoryResultException("No se pueden cargar más de 3 archivos");
+            throw new LaboratoryResultException(String.format("No se pueden cargar más de %s archivos", maxLengthFiles));
 
         validateFiles(archivos, maxFileSizeMb);
     }
@@ -28,7 +28,7 @@ public class ResultadoLaboratorioRequest {
     private void validateFiles(MultipartFile[] files, int maxFileSizeMb) {
         for(MultipartFile file: files){
             if(file.getSize() > (long) maxFileSizeMb * 1024 * 1024) {
-                throw new LaboratoryResultException("Los archivos deben ser menores a 3MB");
+                throw new LaboratoryResultException(String.format("Los archivos deben ser menores a %sMB", maxFileSizeMb));
             }
 
             String extension = FilenameUtils.getExtension(file.getOriginalFilename());

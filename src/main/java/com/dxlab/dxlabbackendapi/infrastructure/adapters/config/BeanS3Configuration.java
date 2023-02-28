@@ -20,7 +20,7 @@ public class BeanS3Configuration {
     private String region;
 
     @Bean
-    @Profile("!test")
+    @Profile("!test-s3")
     public AmazonS3 s3Client() {
         AWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, accessSecret);
         return AmazonS3ClientBuilder
