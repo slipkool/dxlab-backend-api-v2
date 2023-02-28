@@ -16,14 +16,14 @@ public class LaboratoryResultService implements LaboratoryResultUseCase {
 
     @Override
     public void uploadLabResult(LaboratoryResult laboratoryResult) {
-        Order order = orderOutputPort.getOrderById(laboratoryResult.getIdOrder())
-                .orElseThrow(() -> new OrderNotFound("Orden no encontrada con el id: " + laboratoryResult.getIdOrder()));
+        Order order = orderOutputPort.getOrderById(laboratoryResult.getOrderId())
+                .orElseThrow(() -> new OrderNotFound("Orden no encontrada con el id: " + laboratoryResult.getOrderId()));
 
         laboratoryResultOutputport.uploadFiles(laboratoryResult);
 
         order.setReadyResult(true);
         if(!orderOutputPort.updateDateResultOrder(order)) {
-            throw new OrderResultNotUpdate("No se pudo actualizar el resultado de laboratorio de la orden: " + laboratoryResult.getIdOrder());
+            throw new OrderResultNotUpdate("No se pudo actualizar el resultado de laboratorio de la orden: " + laboratoryResult.getOrderId());
         }
     }
 }

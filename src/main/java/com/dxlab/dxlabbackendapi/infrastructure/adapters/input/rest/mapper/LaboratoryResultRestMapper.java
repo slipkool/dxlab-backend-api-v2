@@ -24,8 +24,18 @@ public interface LaboratoryResultRestMapper {
                 .map(LaboratoryResultRestMapper::getLaboratoryFile)
                 .collect(Collectors.toList());
         return LaboratoryResult.builder()
-                .idOrder(resultadoLaboratorioRequest.getIdOrden())
+                .orderId(resultadoLaboratorioRequest.getIdOrden())
                 .files(laboratoryFiles)
+                .build();
+    }
+
+    default ResultadoLaboratorioResponse toLaboratoryResponse(ResultadoLaboratorioRequest resultadoLaboratorioRequest) {
+        String filesName = Arrays.stream(resultadoLaboratorioRequest.getArchivos())
+                .map(MultipartFile::getOriginalFilename)
+                .collect(Collectors.joining(","));
+        return ResultadoLaboratorioResponse.builder()
+                .idOrden(resultadoLaboratorioRequest.getIdOrden())
+                .archivos(filesName)
                 .build();
     }
 
@@ -40,15 +50,5 @@ public interface LaboratoryResultRestMapper {
         } catch (IOException e) {
             throw new LaboratoryResultException("Error al mapear la información de archivos de la petición", e);
         }
-    }
-
-    default ResultadoLaboratorioResponse toLaboratoryResponse(ResultadoLaboratorioRequest resultadoLaboratorioRequest) {
-        String filesName = Arrays.stream(resultadoLaboratorioRequest.getArchivos())
-                .map(MultipartFile::getOriginalFilename)
-                .collect(Collectors.joining(","));
-        return ResultadoLaboratorioResponse.builder()
-                .idOrden(resultadoLaboratorioRequest.getIdOrden())
-                .archivos(filesName)
-                .build();
     }
 }

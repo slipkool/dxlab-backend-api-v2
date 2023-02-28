@@ -10,6 +10,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LaboratoryResult {
-    private Long idOrder;
+    private Long orderId;
     private List<LaboratoryFile> files;
 }

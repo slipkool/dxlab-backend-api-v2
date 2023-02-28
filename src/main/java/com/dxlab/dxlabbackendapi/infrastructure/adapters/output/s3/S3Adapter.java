@@ -18,7 +18,7 @@ public class S3Adapter implements LaboratoryResultOutputport {
     @Override
     public void uploadFiles(LaboratoryResult laboratoryResult) {
         for (LaboratoryFile laboratoryFile: laboratoryResult.getFiles()) {
-            uploadFile(laboratoryResult.getIdOrder(), laboratoryFile);
+            uploadFile(laboratoryResult.getOrderId(), laboratoryFile);
         }
     }
 
