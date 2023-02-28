@@ -17,8 +17,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
 
-    public static final String USER_PEPITO_PEREZ = "Pepito perez";
-    public static final String USER_JOSE_JOSE = "Jose jose";
+    private static final String USER_PEPITO_PEREZ = "Pepito perez";
+    private static final String USER_JOSE_JOSE = "Jose jose";
 
     @InjectMocks
     OrderService orderService;
@@ -34,7 +34,7 @@ class OrderServiceTest {
         );
         when(orderOutputPort.getAll()).thenReturn(orderMockList);
 
-        List<Order> result = orderOutputPort.getAll();
+        List<Order> result = orderService.getAll();
 
         assertThat(result)
                 .hasSize(2)
@@ -48,7 +48,7 @@ class OrderServiceTest {
         Order savedOrder = Order.builder().id(1L).user(USER_PEPITO_PEREZ).build();
         when(orderOutputPort.createOrder(order)).thenReturn(savedOrder);
 
-        Order saveOrder = orderOutputPort.createOrder(order);
+        Order saveOrder = orderService.createOrder(order);
 
         assertThat(saveOrder).isEqualTo(savedOrder);
         verify(orderOutputPort, times(1)).createOrder(any());

@@ -2,6 +2,7 @@ package com.dxlab.dxlabbackendapi.infrastructure.adapters.input.rest.mapper;
 
 import com.dxlab.dxlabbackendapi.domain.model.LaboratoryResult;
 import com.dxlab.dxlabbackendapi.infrastructure.adapters.input.rest.data.request.ResultadoLaboratorioRequest;
+import com.dxlab.dxlabbackendapi.infrastructure.adapters.input.rest.data.response.ResultadoLaboratorioResponse;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.springframework.http.MediaType;
@@ -37,7 +38,18 @@ class LaboratoryResultRestMapperTest {
     }
 
     @Test
-    void shouldMapDomainToDataResponse() {
+    void shouldMapDomainToDataResponse() throws IOException {
+        Path path = Paths.get(SRC_MAIN_RESOURCES_STATIC_TEST_PDF + "Test.pdf");
+        MockMultipartFile file = new MockMultipartFile("archivos", "Test.pdf", MediaType.APPLICATION_PDF_VALUE, Files.readAllBytes(path));
+        MultipartFile[] multipartFiles = { file };
+        ResultadoLaboratorioRequest resultadoLaboratorioRequest = ResultadoLaboratorioRequest.builder()
+                .idOrden(1L)
+                .archivos(multipartFiles)
+                .build();
 
+        ResultadoLaboratorioResponse result = mapper.toLaboratoryResponse(resultadoLaboratorioRequest);
+
+        assertEquals("El mapeo del id de la orden es incorrecto", resultadoLaboratorioRequest.getIdOrden(), result.getIdOrden());
+        assertFalse("El mapeo de los archivos es incorrecto", result.getArchivos().isEmpty());
     }
 }
