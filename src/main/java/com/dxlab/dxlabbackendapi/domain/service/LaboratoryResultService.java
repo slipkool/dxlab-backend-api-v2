@@ -6,6 +6,7 @@ import com.dxlab.dxlabbackendapi.application.ports.output.OrderOutputPort;
 import com.dxlab.dxlabbackendapi.domain.exception.OrderNotFound;
 import com.dxlab.dxlabbackendapi.domain.exception.OrderResultNotUpdate;
 import com.dxlab.dxlabbackendapi.domain.model.LaboratoryResult;
+import com.dxlab.dxlabbackendapi.domain.model.LaboratoryResultInfo;
 import com.dxlab.dxlabbackendapi.domain.model.Order;
 import lombok.AllArgsConstructor;
 
@@ -16,14 +17,35 @@ public class LaboratoryResultService implements LaboratoryResultUseCase {
 
     @Override
     public void uploadLabResult(LaboratoryResult laboratoryResult) {
-        Order order = orderOutputPort.getOrderById(laboratoryResult.getOrderId())
-                .orElseThrow(() -> new OrderNotFound("Orden no encontrada con el id: " + laboratoryResult.getOrderId()));
-
+        Order order = getOrder(laboratoryResult.getOrderId());
         laboratoryResultOutputport.uploadFiles(laboratoryResult);
 
         order.setReadyResult(true);
         if(!orderOutputPort.updateDateResultOrder(order)) {
             throw new OrderResultNotUpdate("No se pudo actualizar el resultado de laboratorio de la orden: " + laboratoryResult.getOrderId());
         }
+    }
+
+    @Override
+    public LaboratoryResultInfo getLabResultFileList(Long orderId) {
+        Order order = getOrder(orderId);
+        return laboratoryResultOutputport.getLabResultFileList(order.getId());
+    }
+
+    @Override
+    public void deleteLabResultFile(Long orderId, String fileName) {
+        Order order = getOrder(orderId);
+        laboratoryResultOutputport.deleteLabResultFile(order.getId(), fileName);
+    }
+
+    @Override
+    public void deleteLabResultFolder(Long orderId) {
+        Order order = getOrder(orderId);
+        laboratoryResultOutputport.deleteLabResultFolder(order.getId());
+    }
+
+    private Order getOrder(Long orderId) {
+        return orderOutputPort.getOrderById(orderId)
+                .orElseThrow(() -> new OrderNotFound("Orden no encontrada con el id: " + orderId));
     }
 }

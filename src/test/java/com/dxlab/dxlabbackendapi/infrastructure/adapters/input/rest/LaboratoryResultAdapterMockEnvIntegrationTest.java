@@ -94,7 +94,7 @@ class LaboratoryResultAdapterMockEnvIntegrationTest extends DbS3ContainersEnviro
         MockMultipartFile file1 = new MockMultipartFile("archivos", "Test1.pdf", MediaType.APPLICATION_PDF_VALUE, Files.readAllBytes(path));
         MockMultipartFile file2 = new MockMultipartFile("archivos", "Test2.pdf", MediaType.APPLICATION_PDF_VALUE, Files.readAllBytes(path));
 
-        mockMvc.perform(multipart("/v1/resultados/cargar-resultados")
+        mockMvc.perform(multipart("/v1/resultados/cargar")
                         .file(file1)
                         .file(file2)
                         .part(idOrder)
@@ -112,7 +112,7 @@ class LaboratoryResultAdapterMockEnvIntegrationTest extends DbS3ContainersEnviro
         MockMultipartFile file1 = new MockMultipartFile("archivos", "Test1.pdf", MediaType.APPLICATION_PDF_VALUE, Files.readAllBytes(path));
         MockMultipartFile file2 = new MockMultipartFile("archivos", "Test1.pdf", MediaType.APPLICATION_PDF_VALUE, Files.readAllBytes(path));
 
-        mockMvc.perform(multipart("/v1/resultados/cargar-resultados")
+        mockMvc.perform(multipart("/v1/resultados/cargar")
                         .file(file1)
                         .file(file2)
                         .part(idOrder)
@@ -129,7 +129,7 @@ class LaboratoryResultAdapterMockEnvIntegrationTest extends DbS3ContainersEnviro
         MockMultipartFile file1 = new MockMultipartFile("archivos", "Test1.pdf", MediaType.APPLICATION_PDF_VALUE, Files.readAllBytes(path));
         MockMultipartFile file2 = new MockMultipartFile("archivos", "Test1.pdf", MediaType.APPLICATION_PDF_VALUE, Files.readAllBytes(path));
 
-        mockMvc.perform(multipart("/v1/resultados/cargar-resultados")
+        mockMvc.perform(multipart("/v1/resultados/cargar")
                         .file(file1)
                         .file(file2)
                         .part(idOrder)

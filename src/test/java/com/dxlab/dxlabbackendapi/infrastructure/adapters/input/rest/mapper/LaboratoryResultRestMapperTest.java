@@ -50,6 +50,6 @@ class LaboratoryResultRestMapperTest {
         ResultadoLaboratorioResponse result = mapper.toLaboratoryResponse(resultadoLaboratorioRequest);
 
         assertEquals("El mapeo del id de la orden es incorrecto", resultadoLaboratorioRequest.getIdOrden(), result.getIdOrden());
-        assertFalse("El mapeo de los archivos es incorrecto", result.getArchivos().isEmpty());
+        assertFalse("El mapeo de los archivos es incorrecto", result.getListaNombreArchivo().isEmpty());
     }
 }

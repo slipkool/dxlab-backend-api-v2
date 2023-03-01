@@ -103,7 +103,7 @@ class LaboratoryResultAdapterIntegrationTest extends DbS3ContainersEnviroment {
                 .header("Content-Disposition", "form-data; name=idOrden")
                 .header("Content-type", "text/plain");
 
-        webTestClient.post().uri("/v1/resultados/cargar-resultados")
+        webTestClient.post().uri("/v1/resultados/cargar")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(builder.build()))
                 .exchange()
@@ -129,7 +129,7 @@ class LaboratoryResultAdapterIntegrationTest extends DbS3ContainersEnviroment {
                 .header("Content-Disposition", "form-data; name=idOrden")
                 .header("Content-type", "text/plain");
 
-        webTestClient.post().uri("/v1/resultados/cargar-resultados")
+        webTestClient.post().uri("/v1/resultados/cargar")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(builder.build()))
                 .exchange()
@@ -155,7 +155,7 @@ class LaboratoryResultAdapterIntegrationTest extends DbS3ContainersEnviroment {
                 .header("Content-Disposition", "form-data; name=idOrden")
                 .header("Content-type", "text/plain");
 
-        webTestClient.post().uri("/v1/resultados/cargar-resultados")
+        webTestClient.post().uri("/v1/resultados/cargar")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(builder.build()))
                 .exchange()
