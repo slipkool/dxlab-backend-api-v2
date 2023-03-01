@@ -11,4 +11,8 @@ public interface LaboratoryResultOutputport {
     void deleteLabResultFile(Long id, String fileName);
 
     void deleteLabResultFolder(Long id);
+
+    byte[] downloadLabResultFile(Long id, String fileName);
+
+    byte[] downloadZipLabResultFile(Long id);
 }

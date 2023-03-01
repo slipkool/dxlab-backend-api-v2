@@ -44,6 +44,18 @@ public class LaboratoryResultService implements LaboratoryResultUseCase {
         laboratoryResultOutputport.deleteLabResultFolder(order.getId());
     }
 
+    @Override
+    public byte[] downloadLabResultFile(Long orderId, String fileName) {
+        Order order = getOrder(orderId);
+        return laboratoryResultOutputport.downloadLabResultFile(order.getId(), fileName);
+    }
+
+    @Override
+    public byte[] downloadZipLabResultFile(Long orderId) {
+        Order order = getOrder(orderId);
+        return laboratoryResultOutputport.downloadZipLabResultFile(order.getId());
+    }
+
     private Order getOrder(Long orderId) {
         return orderOutputPort.getOrderById(orderId)
                 .orElseThrow(() -> new OrderNotFound("Orden no encontrada con el id: " + orderId));

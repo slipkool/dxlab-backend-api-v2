@@ -11,4 +11,8 @@ public interface LaboratoryResultUseCase {
     void deleteLabResultFile(Long orderId, String fileName);
 
     void deleteLabResultFolder(Long orderId);
+
+    byte[] downloadLabResultFile(Long orderId, String fileName);
+
+    byte[] downloadZipLabResultFile(Long orderId);
 }

@@ -2,10 +2,7 @@ package com.dxlab.dxlabbackendapi.infrastructure.adapters.output.s3;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ListObjectsRequest;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.*;
 import com.dxlab.dxlabbackendapi.application.ports.output.LaboratoryResultOutputport;
 import com.dxlab.dxlabbackendapi.domain.exception.LaboratoryResultException;
 import com.dxlab.dxlabbackendapi.domain.model.LaboratoryFile;
@@ -13,9 +10,16 @@ import com.dxlab.dxlabbackendapi.domain.model.LaboratoryResult;
 import com.dxlab.dxlabbackendapi.domain.model.LaboratoryResultInfo;
 import com.dxlab.dxlabbackendapi.infrastructure.adapters.config.S3Properties;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.IOUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @RequiredArgsConstructor
 public class S3Adapter implements LaboratoryResultOutputport {
@@ -44,6 +48,7 @@ public class S3Adapter implements LaboratoryResultOutputport {
 
         List<String> nameFileList =  s3ObjectSummariesList.stream()
                 .map(S3ObjectSummary::getKey)
+                .map(key -> key.substring(key.indexOf("/") + 1))
                 .collect(Collectors.toList());
 
         return LaboratoryResultInfo.builder()
@@ -62,7 +67,7 @@ public class S3Adapter implements LaboratoryResultOutputport {
         try {
             amazonS3.deleteObject(properties.getBucketName(), path);
         } catch (AmazonServiceException e) {
-            throw new LaboratoryResultException(String.format("Error al eliminar el archivo  %s del repositorio",fileName), e);
+            throw new LaboratoryResultException(String.format("Error al eliminar el archivo  %s del repositorio", fileName), e);
         }
     }
 
@@ -87,6 +92,38 @@ public class S3Adapter implements LaboratoryResultOutputport {
             } catch (AmazonServiceException e) {
                 throw new LaboratoryResultException(String.format("Error al eliminar los archivos de la orden %s", orderId), e);
             }
+        }
+    }
+
+    @Override
+    public byte[] downloadLabResultFile(Long orderId, String fileName) {
+        String path = String.format(STRING_TWO_PARAMS, orderId, fileName);
+        final S3Object s3Object = amazonS3.getObject(properties.getBucketName(), path);
+        try {
+            return IOUtils.toByteArray(s3Object.getObjectContent());
+        } catch(final IOException e) {
+            throw new LaboratoryResultException(String.format("Error al descargar el archivo  %s del repositorio", fileName), e);
+        }
+    }
+
+    @Override
+    public byte[] downloadZipLabResultFile(Long orderId) {
+        LaboratoryResultInfo laboratoryResultInfo = getLabResultFileList(orderId);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ZipOutputStream zipOutputStream = new ZipOutputStream(baos);
+        try {
+            for (String fileName : laboratoryResultInfo.getNameFileList()) {
+                ZipEntry zip = new ZipEntry(fileName);
+                zipOutputStream.putNextEntry(zip);
+                InputStream is = new ByteArrayInputStream(downloadLabResultFile(orderId, fileName));
+                IOUtils.copy(is, zipOutputStream);
+                is.close();
+                zipOutputStream.closeEntry();
+            }
+            zipOutputStream.close();
+            return baos.toByteArray();
+        } catch(final IOException e) {
+            throw new LaboratoryResultException(String.format("Error al descargar el archivo zip de la orden %s", orderId), e);
         }
     }
 
