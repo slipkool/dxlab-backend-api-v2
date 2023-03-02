@@ -16,5 +16,5 @@ Para descifrar claves desde la terminal de intellij debemos ejecutar el siguient
 Esto lo agregaremos en el archivo de propiedades del proyecto
 
 ### App
-Desplegar el artefactor agregando esta propiedad
+Desplegar el artefactor agregando esta propiedad (vm options)
 > -Djasypt.encryptor.password=u8x/A?D(G+KbPeShVmYq3s6v9y$B&E)H

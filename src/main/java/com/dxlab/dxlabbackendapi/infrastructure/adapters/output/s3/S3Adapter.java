@@ -99,20 +99,20 @@ public class S3Adapter implements LaboratoryResultOutputport {
     @Override
     public byte[] downloadLabResultFile(Long orderId, String fileName) {
         String path = String.format(STRING_TWO_PARAMS, orderId, fileName);
-        final S3Object s3Object = amazonS3.getObject(properties.getBucketName(), path);
         try {
+            final S3Object s3Object = amazonS3.getObject(properties.getBucketName(), path);
             return IOUtils.toByteArray(s3Object.getObjectContent());
-        } catch(final IOException e) {
-            throw new LaboratoryResultException(String.format("Error al descargar el archivo  %s del repositorio", fileName), e);
+        } catch(AmazonServiceException | IOException e) {
+            throw new LaboratoryResultException(String.format("Error al descargar el archivo %s del repositorio", fileName), e);
         }
     }
 
     @Override
     public byte[] downloadZipLabResultFile(Long orderId) {
-        LaboratoryResultInfo laboratoryResultInfo = getLabResultFileList(orderId);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ZipOutputStream zipOutputStream = new ZipOutputStream(baos);
         try {
+            LaboratoryResultInfo laboratoryResultInfo = getLabResultFileList(orderId);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ZipOutputStream zipOutputStream = new ZipOutputStream(baos);
             for (String fileName : laboratoryResultInfo.getNameFileList()) {
                 ZipEntry zip = new ZipEntry(fileName);
                 zipOutputStream.putNextEntry(zip);

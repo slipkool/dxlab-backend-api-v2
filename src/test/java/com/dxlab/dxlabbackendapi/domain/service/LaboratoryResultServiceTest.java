@@ -5,6 +5,7 @@ import com.dxlab.dxlabbackendapi.application.ports.output.OrderOutputPort;
 import com.dxlab.dxlabbackendapi.domain.exception.NotFoundException;
 import com.dxlab.dxlabbackendapi.domain.exception.OrderResultNotUpdate;
 import com.dxlab.dxlabbackendapi.domain.model.LaboratoryResult;
+import com.dxlab.dxlabbackendapi.domain.model.LaboratoryResultInfo;
 import com.dxlab.dxlabbackendapi.domain.model.Order;
 import com.dxlab.dxlabbackendapi.infrastructure.adapters.input.rest.data.request.ResultadoLaboratorioRequest;
 import com.dxlab.dxlabbackendapi.infrastructure.adapters.input.rest.mapper.LaboratoryResultRestMapper;
@@ -22,11 +23,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -105,5 +106,86 @@ class LaboratoryResultServiceTest {
         OrderResultNotUpdate exception = assertThrows(OrderResultNotUpdate.class, () -> laboratoryResultService.uploadLabResult(laboratoryResult));
 
         assertEquals("No se pudo actualizar el resultado de laboratorio de la orden: 1", exception.getMessage());
+    }
+
+    @Test
+    void shouldGetLabResultFileList() {
+        LaboratoryResultInfo laboratoryResultInfoMock = LaboratoryResultInfo.builder()
+                .orderId(1L)
+                .nameFileList(List.of("Test.pdf"))
+                .build();
+        Order orderMock = Order.builder()
+                .id(1L)
+                .user(USER_PEPITO_PEREZ)
+                .build();
+        when(orderOutputPort.getOrderById(anyLong())).thenReturn(Optional.of(orderMock));
+        when(laboratoryResultOutputport.getLabResultFileList(anyLong())).thenReturn(laboratoryResultInfoMock);
+
+        LaboratoryResultInfo result = laboratoryResultService.getLabResultFileList(1L);
+
+        assertEquals(laboratoryResultInfoMock.getOrderId(), result.getOrderId());
+        assertFalse(result.getNameFileList().isEmpty());
+    }
+
+    @Test
+    void shouldDeleteLabResultFile() {
+        Order orderMock = Order.builder()
+                .id(1L)
+                .user(USER_PEPITO_PEREZ)
+                .build();
+        when(orderOutputPort.getOrderById(anyLong())).thenReturn(Optional.of(orderMock));
+        doNothing().when(laboratoryResultOutputport).deleteLabResultFile(anyLong(), anyString());
+
+        String result = assertDoesNotThrow(() -> {
+            laboratoryResultService.deleteLabResultFile(1L, "Test.pdf");
+            return "OK";
+        });
+
+        assertEquals("OK", result);
+    }
+
+    @Test
+    void shouldDeleteLabResultFolder() {
+        Order orderMock = Order.builder()
+                .id(1L)
+                .user(USER_PEPITO_PEREZ)
+                .build();
+        when(orderOutputPort.getOrderById(anyLong())).thenReturn(Optional.of(orderMock));
+        doNothing().when(laboratoryResultOutputport).deleteLabResultFolder(anyLong());
+
+        String result = assertDoesNotThrow(() -> {
+            laboratoryResultService.deleteLabResultFolder(1L);
+            return "OK";
+        });
+
+        assertEquals("OK", result);
+    }
+
+    @Test
+    void shouldDownloadLabResultFile() {
+        byte[] byteMock = "Test".getBytes();
+        Order orderMock = Order.builder()
+                .id(1L)
+                .user(USER_PEPITO_PEREZ)
+                .build();
+        when(orderOutputPort.getOrderById(anyLong())).thenReturn(Optional.of(orderMock));
+        when(laboratoryResultOutputport.downloadLabResultFile(anyLong(), anyString())).thenReturn(byteMock);
+
+        byte[] result = laboratoryResultService.downloadLabResultFile(1L, "Test.pdf");
+        assertArrayEquals(byteMock, result);
+    }
+
+    @Test
+    void shouldDownloadZipLabResultFile() {
+        byte[] byteMock = "Test".getBytes();
+        Order orderMock = Order.builder()
+                .id(1L)
+                .user(USER_PEPITO_PEREZ)
+                .build();
+        when(orderOutputPort.getOrderById(anyLong())).thenReturn(Optional.of(orderMock));
+        when(laboratoryResultOutputport.downloadZipLabResultFile(anyLong())).thenReturn(byteMock);
+
+        byte[] result = laboratoryResultService.downloadZipLabResultFile(1L);
+        assertArrayEquals(byteMock, result);
     }
 }
