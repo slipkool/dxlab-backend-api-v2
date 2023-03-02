@@ -1,7 +1,7 @@
 package com.dxlab.dxlabbackendapi.infrastructure.adapters.output.customizedexception;
 
 import com.dxlab.dxlabbackendapi.domain.exception.LaboratoryResultException;
-import com.dxlab.dxlabbackendapi.domain.exception.OrderNotFound;
+import com.dxlab.dxlabbackendapi.domain.exception.NotFoundException;
 import com.dxlab.dxlabbackendapi.domain.exception.OrderResultNotUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,13 +53,13 @@ public class CustomizedExceptionAdapter extends ResponseEntityExceptionHandler {
         return ResponseEntity.badRequest().body(pd);
     }
 
-    @ExceptionHandler(OrderNotFound.class)
-    public final ResponseEntity<Object> handleOrderNotFound(RuntimeException  ex) {
+    @ExceptionHandler(NotFoundException.class)
+    public final ResponseEntity<Object> handleNotFoundException(RuntimeException  ex) {
         log.warn(EXCEPTION_OCCURED_WHICH_WILL_CAUSE_A_RESPONSE, HttpStatus.NOT_FOUND, ex);
         HttpStatus status = HttpStatus.NOT_FOUND;
-        String title = "Error al buscar la orden";
+        String title = "Error al buscar la información";
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(status, ex.getMessage());
         pd.setTitle(title);
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(pd);
     }
 }

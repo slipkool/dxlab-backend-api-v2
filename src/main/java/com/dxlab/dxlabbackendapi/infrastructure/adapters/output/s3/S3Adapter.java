@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.dxlab.dxlabbackendapi.application.ports.output.LaboratoryResultOutputport;
 import com.dxlab.dxlabbackendapi.domain.exception.LaboratoryResultException;
+import com.dxlab.dxlabbackendapi.domain.exception.NotFoundException;
 import com.dxlab.dxlabbackendapi.domain.model.LaboratoryFile;
 import com.dxlab.dxlabbackendapi.domain.model.LaboratoryResult;
 import com.dxlab.dxlabbackendapi.domain.model.LaboratoryResultInfo;
@@ -38,12 +39,12 @@ public class S3Adapter implements LaboratoryResultOutputport {
     public LaboratoryResultInfo getLabResultFileList(Long orderId) {
         ObjectListing objectListing = amazonS3.listObjects(properties.getBucketName(), String.valueOf(orderId));
         if(objectListing == null) {
-            throw new LaboratoryResultException("No hay archivos para la orden: " + orderId);
+            throw new NotFoundException("No hay archivos para la orden: " + orderId);
         }
 
         List<S3ObjectSummary> s3ObjectSummariesList = objectListing.getObjectSummaries();
         if(s3ObjectSummariesList.isEmpty()) {
-            throw new LaboratoryResultException("No hay archivos para la orden: " + orderId);
+            throw new NotFoundException("No hay archivos para la orden: " + orderId);
         }
 
         List<String> nameFileList =  s3ObjectSummariesList.stream()

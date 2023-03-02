@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.dxlab.dxlabbackendapi.infrastructure.adapters.output.persistence.entity.OrderEntity;
 import com.dxlab.dxlabbackendapi.infrastructure.adapters.output.persistence.repository.OrderRespository;
@@ -23,11 +24,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -37,12 +41,13 @@ class LaboratoryResultAdapterIntegrationTest extends DbS3ContainersEnviroment {
 
     private static final String USER_PEPITO_PEREZ = "Pepito perez";
     private static final String SRC_MAIN_RESOURCES_STATIC_TEST_PDF = "src/main/resources/testFiles/Test.pdf";
+    public static final String EXAMINATION_GRIPE = "Gripe";
 
     @Autowired
     OrderRespository orderRespository;
 
     @Autowired
-    AmazonS3 s3;
+    AmazonS3 amazonS3;
 
     @Autowired
     private WebTestClient webTestClient;
@@ -73,13 +78,13 @@ class LaboratoryResultAdapterIntegrationTest extends DbS3ContainersEnviroment {
     private void clearS3Bucket() {
         ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
                 .withBucketName(BUCKET_NAME);
-        ObjectListing objectListing = s3.listObjects(listObjectsRequest);
+        ObjectListing objectListing = amazonS3.listObjects(listObjectsRequest);
         while (true) {
             for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
-                s3.deleteObject(BUCKET_NAME, objectSummary.getKey());
+                amazonS3.deleteObject(BUCKET_NAME, objectSummary.getKey());
             }
             if (objectListing.isTruncated()) {
-                objectListing = s3.listNextBatchOfObjects(objectListing);
+                objectListing = amazonS3.listNextBatchOfObjects(objectListing);
             } else {
                 break;
             }
@@ -87,8 +92,8 @@ class LaboratoryResultAdapterIntegrationTest extends DbS3ContainersEnviroment {
     }
 
     @Test
-    void uploadLaboratoryResult() throws IOException {
-        OrderEntity orderEntity = OrderEntity.builder().user(USER_PEPITO_PEREZ).examination("Gripe").build();
+    void shouldUploadLaboratoryResult() throws IOException {
+        OrderEntity orderEntity = OrderEntity.builder().user(USER_PEPITO_PEREZ).examination(EXAMINATION_GRIPE).build();
         orderRespository.save(orderEntity);
 
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
@@ -113,8 +118,8 @@ class LaboratoryResultAdapterIntegrationTest extends DbS3ContainersEnviroment {
     }
 
     @Test
-    void uploadLaboratoryResult_badRequestFileExist() throws IOException {
-        OrderEntity orderEntity = OrderEntity.builder().user("Pepito perez").examination("Gripe").build();
+    void shouldUploadLaboratoryResult_badRequestFileExist() throws IOException {
+        OrderEntity orderEntity = OrderEntity.builder().user(USER_PEPITO_PEREZ).examination(EXAMINATION_GRIPE).build();
         orderRespository.save(orderEntity);
 
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
@@ -139,8 +144,8 @@ class LaboratoryResultAdapterIntegrationTest extends DbS3ContainersEnviroment {
     }
 
     @Test
-    void uploadLaboratoryResult_badRequestOrderNotFound() throws IOException {
-        OrderEntity orderEntity = OrderEntity.builder().user("Pepito perez").examination("Gripe").build();
+    void shouldUploadLaboratoryResult_badRequestOrderNotFound() throws IOException {
+        OrderEntity orderEntity = OrderEntity.builder().user(USER_PEPITO_PEREZ).examination(EXAMINATION_GRIPE).build();
         orderRespository.save(orderEntity);
 
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
@@ -159,8 +164,102 @@ class LaboratoryResultAdapterIntegrationTest extends DbS3ContainersEnviroment {
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(builder.build()))
                 .exchange()
-                .expectStatus().isBadRequest()
+                .expectStatus().isNotFound()
                 .expectBody()
                 .jsonPath("$.detail").isEqualTo("Orden no encontrada con el id: 2");
+    }
+
+    @Test
+    void shouldLabResultFileList_whenNoException() {
+        String orderId = "1";
+        final File file = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("testFiles/Test.pdf")).getFile());
+        final PutObjectRequest putObjectRequest = new PutObjectRequest(BUCKET_NAME, String.format("%s/%s",orderId,file.getName()), file);
+        amazonS3.putObject(putObjectRequest);
+        OrderEntity orderEntity = OrderEntity.builder().user(USER_PEPITO_PEREZ).examination(EXAMINATION_GRIPE).build();
+        orderRespository.save(orderEntity);
+
+        webTestClient.get().uri(String.format("/v1/resultados/listar/%s", orderId))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                //.consumeWith(System.out::println)
+                .jsonPath("$.idOrden").isEqualTo("1")
+                .jsonPath("$.listaNombreArchivo", hasSize(1));
+    }
+
+    @Test
+    void shouldException_whenNoFoundFilesInGetListFiles() {
+        String orderId = "1";
+        OrderEntity orderEntity = OrderEntity.builder().user(USER_PEPITO_PEREZ).examination(EXAMINATION_GRIPE).build();
+        orderRespository.save(orderEntity);
+
+        webTestClient.get().uri(String.format("/v1/resultados/listar/%s", orderId))
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .consumeWith(System.out::println)
+                .jsonPath("$.detail").isEqualTo("No hay archivos para la orden: 1");
+    }
+
+    @Test
+    void shouldDeleteLabResultFileList_whenNoException() {
+        String orderId = "1";
+        final File file = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("testFiles/Test.pdf")).getFile());
+        final PutObjectRequest putObjectRequest = new PutObjectRequest(BUCKET_NAME, String.format("%s/%s",orderId,file.getName()), file);
+        amazonS3.putObject(putObjectRequest);
+        OrderEntity orderEntity = OrderEntity.builder().user(USER_PEPITO_PEREZ).examination(EXAMINATION_GRIPE).build();
+        orderRespository.save(orderEntity);
+
+        webTestClient.delete().uri(String.format("/v1/resultados/eliminar/%s", orderId))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class).isEqualTo(String.format("Archivos de la orden %s, eliminados correctamente", orderId))
+                .consumeWith(System.out::println);
+    }
+
+    @Test
+    void shouldDeleteLabResultFile_whenNoException() {
+        String orderId = "1";
+        String fileName = "Test.pdf";
+        final File file = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("testFiles/Test.pdf")).getFile());
+        final PutObjectRequest putObjectRequest = new PutObjectRequest(BUCKET_NAME, String.format("%s/%s",orderId,file.getName()), file);
+        amazonS3.putObject(putObjectRequest);
+        OrderEntity orderEntity = OrderEntity.builder().user(USER_PEPITO_PEREZ).examination(EXAMINATION_GRIPE).build();
+        orderRespository.save(orderEntity);
+
+        webTestClient.delete().uri(String.format("/v1/resultados/eliminar/%s/%s", orderId, fileName))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class).isEqualTo(String.format("Archivo %s de la orden %s, eliminado correctamente", fileName, orderId))
+                .consumeWith(System.out::println);
+    }
+
+    @Test
+    void shouldDownloadLabResultFile_whenNoException() {
+        String orderId = "1";
+        String fileName = "Test.pdf";
+        final File file = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("testFiles/Test.pdf")).getFile());
+        final PutObjectRequest putObjectRequest = new PutObjectRequest(BUCKET_NAME, String.format("%s/%s",orderId,file.getName()), file);
+        amazonS3.putObject(putObjectRequest);
+        OrderEntity orderEntity = OrderEntity.builder().user(USER_PEPITO_PEREZ).examination(EXAMINATION_GRIPE).build();
+        orderRespository.save(orderEntity);
+
+        webTestClient.get().uri(String.format("/v1/resultados/descargar/%s/%s", orderId, fileName))
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
+    void shouldDownloadLabResultZipFile_whenNoException() {
+        String orderId = "1";
+        final File file = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("testFiles/Test.pdf")).getFile());
+        final PutObjectRequest putObjectRequest = new PutObjectRequest(BUCKET_NAME, String.format("%s/%s",orderId,file.getName()), file);
+        amazonS3.putObject(putObjectRequest);
+        OrderEntity orderEntity = OrderEntity.builder().user(USER_PEPITO_PEREZ).examination(EXAMINATION_GRIPE).build();
+        orderRespository.save(orderEntity);
+
+        webTestClient.get().uri(String.format("/v1/resultados/descargar-zip/%s", orderId))
+                .exchange()
+                .expectStatus().isOk();
     }
 }

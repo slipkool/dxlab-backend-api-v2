@@ -3,7 +3,7 @@ package com.dxlab.dxlabbackendapi.domain.service;
 import com.dxlab.dxlabbackendapi.application.ports.input.LaboratoryResultUseCase;
 import com.dxlab.dxlabbackendapi.application.ports.output.LaboratoryResultOutputport;
 import com.dxlab.dxlabbackendapi.application.ports.output.OrderOutputPort;
-import com.dxlab.dxlabbackendapi.domain.exception.OrderNotFound;
+import com.dxlab.dxlabbackendapi.domain.exception.NotFoundException;
 import com.dxlab.dxlabbackendapi.domain.exception.OrderResultNotUpdate;
 import com.dxlab.dxlabbackendapi.domain.model.LaboratoryResult;
 import com.dxlab.dxlabbackendapi.domain.model.LaboratoryResultInfo;
@@ -58,6 +58,6 @@ public class LaboratoryResultService implements LaboratoryResultUseCase {
 
     private Order getOrder(Long orderId) {
         return orderOutputPort.getOrderById(orderId)
-                .orElseThrow(() -> new OrderNotFound("Orden no encontrada con el id: " + orderId));
+                .orElseThrow(() -> new NotFoundException("Orden no encontrada con el id: " + orderId));
     }
 }

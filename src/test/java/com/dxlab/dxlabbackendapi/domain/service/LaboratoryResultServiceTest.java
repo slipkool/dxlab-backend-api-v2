@@ -2,7 +2,7 @@ package com.dxlab.dxlabbackendapi.domain.service;
 
 import com.dxlab.dxlabbackendapi.application.ports.output.LaboratoryResultOutputport;
 import com.dxlab.dxlabbackendapi.application.ports.output.OrderOutputPort;
-import com.dxlab.dxlabbackendapi.domain.exception.OrderNotFound;
+import com.dxlab.dxlabbackendapi.domain.exception.NotFoundException;
 import com.dxlab.dxlabbackendapi.domain.exception.OrderResultNotUpdate;
 import com.dxlab.dxlabbackendapi.domain.model.LaboratoryResult;
 import com.dxlab.dxlabbackendapi.domain.model.Order;
@@ -79,7 +79,7 @@ class LaboratoryResultServiceTest {
                 .build();
         when(orderOutputPort.getOrderById(anyLong())).thenReturn(Optional.empty());
 
-        OrderNotFound exception = assertThrows(OrderNotFound.class, () -> laboratoryResultService.uploadLabResult(laboratoryResult));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> laboratoryResultService.uploadLabResult(laboratoryResult));
 
         assertEquals("Orden no encontrada con el id: 1", exception.getMessage());
     }

@@ -59,18 +59,6 @@ public class LaboratoryResultAdapter {
         return ResponseEntity.ok().body(String.format("Archivo %s de la orden %s, eliminado correctamente", fileName, orderId));
     }
 
-    @GetMapping("/descargar/{idOrden}/{nombreArchivo}")
-    public ResponseEntity<ByteArrayResource> downloadLabResultFile(@PathVariable("idOrden") Long orderId, @PathVariable("nombreArchivo") String fileName) {
-        final byte[] data = laboratoryResultUseCase.downloadLabResultFile(orderId, fileName);
-
-        return ResponseEntity
-                .ok()
-                .contentLength(data.length)
-                .header("Content-type", MediaType.APPLICATION_OCTET_STREAM_VALUE)
-                .header("Content-disposition", "attachment; filename=\"" + fileName + "\"")
-                .body(new ByteArrayResource(data));
-    }
-
     @GetMapping("/descargar-zip/{idOrden}")
     public void downloadZipLabResultFile(@PathVariable("idOrden") Long orderId, HttpServletResponse response) throws IOException {
         response.setHeader("Content-type", "application-download");
@@ -82,5 +70,17 @@ public class LaboratoryResultAdapter {
         outStream.write(zipBytes);
         outStream.close();
         response.flushBuffer();
+    }
+
+    @GetMapping("/descargar/{idOrden}/{nombreArchivo}")
+    public ResponseEntity<ByteArrayResource> downloadLabResultFile(@PathVariable("idOrden") Long orderId, @PathVariable("nombreArchivo") String fileName) {
+        final byte[] data = laboratoryResultUseCase.downloadLabResultFile(orderId, fileName);
+
+        return ResponseEntity
+                .ok()
+                .contentLength(data.length)
+                .header("Content-type", MediaType.APPLICATION_OCTET_STREAM_VALUE)
+                .header("Content-disposition", "attachment; filename=\"" + fileName + "\"")
+                .body(new ByteArrayResource(data));
     }
 }

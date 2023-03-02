@@ -1,7 +1,7 @@
 package com.dxlab.dxlabbackendapi.infrastructure.adapters.output.persistence;
 
 import com.dxlab.dxlabbackendapi.application.ports.output.OrderOutputPort;
-import com.dxlab.dxlabbackendapi.domain.exception.OrderNotFound;
+import com.dxlab.dxlabbackendapi.domain.exception.NotFoundException;
 import com.dxlab.dxlabbackendapi.domain.model.Order;
 import com.dxlab.dxlabbackendapi.infrastructure.adapters.output.persistence.entity.OrderEntity;
 import com.dxlab.dxlabbackendapi.infrastructure.adapters.output.persistence.mapper.OrderPersistenceMapper;
@@ -50,6 +50,6 @@ public class OrderPersistenceAdapter implements OrderOutputPort {
         if(result == 1) {
             return true;
         }
-        throw new OrderNotFound("Orden no encontrada con el id: " + order.getId());
+        throw new NotFoundException("Orden no encontrada con el id: " + order.getId());
     }
 }
